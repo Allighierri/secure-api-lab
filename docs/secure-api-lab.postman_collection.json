@@ -1,0 +1,368 @@
+{
+  "info": {
+    "name": "secure-api-lab — Workshop 3",
+    "description": "All eight Stage 5 scenarios, the public endpoint and cleanup. Restart the server before each full run: request 07 deletes seed document 1. Run in listed order. Credentials are fictional examples from the lab.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "createdDocumentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Public endpoint — 200",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 No credentials — 401",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/documents"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Employees as user — 403",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "user1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Documents as user — 200",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "user1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/documents"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Employees as admin — 200",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "admin1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/employees"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Create document — 201",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "user1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/documents",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Test Doc\",\n  \"content\": \"...\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set(\"createdDocumentId\", String(pm.response.json().id)); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Missing title — 400",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "user1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/documents",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"...\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Delete document 1 — 204",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "admin1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/documents/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });",
+              "pm.test(\"Empty response body\", function () { pm.expect(pm.response.text()).to.eql(\"\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Unknown route — 404",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "admin1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/non-existent"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Repeated deletion — 404",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "admin1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/documents/1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", function () { pm.response.to.have.status(404); });",
+              "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Remove created test document — 204",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-Login",
+            "value": "user1",
+            "type": "text"
+          },
+          {
+            "key": "X-Password",
+            "value": "password123",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/documents/{{createdDocumentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", function () { pm.response.to.have.status(204); });",
+              "pm.test(\"Empty response body\", function () { pm.expect(pm.response.text()).to.eql(\"\"); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
