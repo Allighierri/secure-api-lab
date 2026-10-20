@@ -1,0 +1,26 @@
+{
+  "name": "secure-api-lab",
+  "version": "1.0.0",
+  "description": "Лабораторно-практична робота №3 — захищений REST API на Node.js та Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Allighierri/secure-api-lab.git"
+  },
+  "keywords": [],
+  "author": "Allighierri",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Allighierri/secure-api-lab/issues"
+  },
+  "homepage": "https://github.com/Allighierri/secure-api-lab#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
