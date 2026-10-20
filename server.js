@@ -5,6 +5,13 @@ const { users, documents, employees } = require('./data');
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 
+function loggingMiddleware(req, res, next) {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+}
+
+// Логер стоїть першим, щоб реєструвати також помилки парсингу JSON.
+app.use(loggingMiddleware);
 app.use(express.json());
 
 function authMiddleware(req, res, next) {
